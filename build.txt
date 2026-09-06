@@ -1,0 +1,6 @@
+author = NewMod Contributors
+displayName = NewMod
+hideCode = false
+hideResources = false
+includeSource = true
+version = 0.1.0

@@ -1,0 +1,10 @@
+Mods: {
+	NewMod: {
+		Items: {
+			ImperialSword: {
+				DisplayName: Imperial Sword
+				Tooltip: Strikes set enemies on fire
+			}
+		}
+	}
+}
