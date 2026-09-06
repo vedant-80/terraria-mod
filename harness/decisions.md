@@ -1,5 +1,16 @@
 # Decision Log
 
+### ADR-004: Default ExampleMod weapon resource layout
+
+- Date: 2026-09-06
+- Status: accepted
+- Deciders: repository creator
+- Context: ImperialSword reload failed because its primary texture was absent from the default resource path.
+- Decision: Keep weapon C# and same-name PNG together under Content/Items/Weapons, matching class/namespace to path. No primary weapon Texture relocation override. Reserve assets/ for effects, music, sounds and shared textures; concepts and specs go in designs/. Run a sibling PNG preflight in the build helper.
+- Consequences: ImperialSword receives a 40×40 export from the creator-provided concept. Original concepts move unchanged to designs/concepts. Runtime appearance remains subject to client testing; external provenance is unverified.
+- Validation: missing-file regression, PNG decode/dimensions, source hashes, build helper and client reload when available.
+- Supersedes: none.
+
 Record choices that constrain future work. The architect owns architectural decisions; the orchestrator ensures entries are written. Never rewrite history: supersede an old entry with a new one.
 
 ## Entry format

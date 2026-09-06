@@ -16,6 +16,16 @@ Append evidence for meaningful validation runs. Keep failures: they are useful d
 
 ## Runs
 
+### 2026-09-06 — Imperial Sword texture repair and default weapon layout
+
+- Agent: primary implementer with separate verifier review pass; no independent subagent invoked.
+- Baseline: `bash harness/helpers/build.sh` failed with MSB4019 (missing `/home/vdnt/tmod/tModLoader.targets`); this pre-existing blocker does not prevent scoped asset repair.
+- Regression evidence: `python3 harness/helpers/check_weapon_assets.py` reported `Missing weapon texture: Content/Items/Weapons/ImperialSword.png` before export. After export the same preflight, invoked through the build helper, passed.
+- Export: existing resize helper with `--reference /home/vdnt/tmod/ExampleMod/Content/Items/Weapons/ExampleSword.png --pixel-size 1`; Pillow full decode verified 40×40 RGBA and content bounds (0,0,39,40). Native image visually inspected. See designs/weapons/ImperialSword.md.
+- Preservation: SHA256 before/after moving both concept files to designs/concepts matched: sword ba79542e8af823b6c25be683edceb41a03a42d1750168927459b122fcf76c500; shard 83c8dc561b44a06c6d2c93021e94687f9e26e09d3dea5c78503373c2ab9e6405.
+- Final build: asset preflight passed; dotnet compilation still blocked by MSB4019. `git diff --check` passed. Reviewed changed files and default class/namespace alignment; no gameplay C# changed.
+- Not run: client reload, inventory/world/swing, 4× and bright/dark visual tests. Restore the compatible installed tModLoader targets, run the helper, then Build + Reload and inspect Imperial Sword in those contexts. This repairs the confirmed missing file; it is not evidence of a successful game load or final art approval.
+
 ### 2026-09-05 — Build verifier and sprite helpers
 
 - Agent: primary agent, separate orchestrator/implementation/verifier review passes; no independent subagent tool available

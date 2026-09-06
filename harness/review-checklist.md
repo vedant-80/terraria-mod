@@ -31,6 +31,8 @@ Use the applicable sections. Mark `N/A` with a reason; unchecked items block com
 
 ## Visual assets
 
+- [ ] Each weapon has a case-exact sibling PNG and matching namespace/class for default lookup; build asset preflight passes.
+
 - [ ] Sprite dimensions, frame count/layout, origin, animation timing, palette, and glow behavior match the asset specification.
 - [ ] Transparent pixels, seams, stray colors, silhouette, and one-pixel artifacts were inspected at 1× and enlarged nearest-neighbor scale.
 - [ ] Inventory/world/projectile frames align without jitter or clipping.

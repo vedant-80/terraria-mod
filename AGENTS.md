@@ -32,6 +32,7 @@ These instructions apply to every human or AI contributor in this repository. Re
 - Use localization keys for player-facing text. Tooltips must describe real mechanics without concealing essential conditions.
 - Keep balance values named and justified against the intended progression point and comparable content.
 - Keep assets lossless, correctly framed, case-correct, and documented. Validate pixel art in motion and in its actual Terraria contexts.
+- Follow ExampleMod's default weapon layout: `Content/Items/Weapons/<Name>.cs` and `<Name>.png` sit together, with class name and namespace matching the path. Do not override `Texture` to relocate the primary weapon sprite. Reserve `assets/` for effects, music, sounds, and shared textures; keep concept/reference art in `designs/`. Verify every weapon's matching PNG before integration.
 
 ## Role and handoff protocol
 

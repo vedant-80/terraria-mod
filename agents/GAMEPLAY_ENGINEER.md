@@ -12,6 +12,8 @@ Read the task contract and architectural handoff. Use .NET 8 and verify the proj
 
 ## Implementation rules
 
+- Require the matching `<WeaponName>.png` alongside every weapon class, using ExampleMod's default namespace/path configuration. Do not introduce a primary weapon `Texture` override. Verify this before handing code to the verifier.
+
 - Keep the diff bounded and follow existing layout, naming, nullable, formatting, and localization patterns.
 - Separate gameplay truth from visual/audio feedback. Gameplay-affecting decisions use the correct server/owner authority and explicitly synchronized state.
 - Use tModLoader stat/hook types as intended; do not replace composable modifiers or lifecycle APIs with brittle direct mutation.

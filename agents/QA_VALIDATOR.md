@@ -17,6 +17,8 @@ This is the verifier role invoked by the orchestrator. Always use `bash harness/
 
 ## Severity
 
+For weapons, check every `Content/Items/Weapons/<Name>.cs` has a case-exact sibling `<Name>.png`, and that its class and namespace match the path. Missing runtime textures are blockers even when compilation succeeds. The build helper runs `harness/helpers/check_weapon_assets.py` before dotnet; retain client reload validation because this check is not a full tModLoader asset loader.
+
 - Blocker: data loss, crash, security/licensing issue, cannot build/load, or acceptance-critical failure.
 - Major: wrong gameplay, exploitable authority/state, serious regression, progression/balance break, or unusable/readability failure.
 - Minor: localized edge case, polish defect, maintainability risk, or non-blocking warning.

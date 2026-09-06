@@ -3,6 +3,7 @@
 set -euo pipefail
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$repo_root"
+python3 "$repo_root/harness/helpers/check_weapon_assets.py"
 sdk_version="$(dotnet --version)"
 if [[ "$sdk_version" != 8.* ]]; then
     echo "Build requires .NET SDK 8; selected: $sdk_version" >&2

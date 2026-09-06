@@ -1,5 +1,7 @@
 # Shared helpers
 
+Build now requires Python 3 for `check_weapon_assets.py`, run before dotnet. Every C# file under `Content/Items/Weapons/` requires a case-exact sibling PNG with a nonzero PNG header. This is not full PNG decoding or C# parsing: review namespace/class alignment and client reload separately. Keep helper classes outside the weapon directory. Primary weapon sprites follow ExampleMod's sibling layout. Reserve `assets/` for effects, music, sounds and shared textures; concepts belong in `designs/`.
+
 Run `bash harness/helpers/build.sh` before adding or editing code and after implementation. It selects SDK 8 through root `global.json`, calls `dotnet build` on NewMod.csproj, and propagates failure. Run from any directory using the script's absolute path. It does not install tModLoader: the project still requires `../tModLoader.targets` and its referenced assemblies. Save the command, exit status, and output in the verifier handoff/build log. A failed baseline permits scoped repairs or helper work recorded by the orchestrator, but never counts as a passing build.
 
 For resizing, create a virtual environment and install the helper dependency:
@@ -7,7 +9,7 @@ For resizing, create a virtual environment and install the helper dependency:
 ```sh
 python3 -m venv /tmp/newmod-sprite-tools
 /tmp/newmod-sprite-tools/bin/pip install -r harness/helpers/requirements.txt
-/tmp/newmod-sprite-tools/bin/python harness/helpers/resize_asset.py assets/concepts/imperial-sword-concept.png /tmp/imperial-sword-draft.png --reference /home/vdnt/tmod/ExampleMod/Content/Items/Weapons/ExampleSword.png --pixel-size 2
+/tmp/newmod-sprite-tools/bin/python harness/helpers/resize_asset.py designs/concepts/imperial-sword-concept.png /tmp/imperial-sword-draft.png --reference /home/vdnt/tmod/ExampleMod/Content/Items/Weapons/ExampleSword.png --pixel-size 2
 ```
 
 The importable `resize_asset` function and CLI preserve source files, reject existing outputs, trim transparent margins, fit proportions to within logical-pixel rounding, center with transparent padding, and export RGBA PNG with nearest-neighbor sampling. Output directories must already exist. `--pixel-size 2` gives consistent 2×2 clusters on a 20×20 logical grid for a 40×40 export; use 1 for individually authored export pixels. Both canvas dimensions must divide evenly by the selected pixel size. This controls square pixel clusters, not Terraria world scale or item hitboxes.

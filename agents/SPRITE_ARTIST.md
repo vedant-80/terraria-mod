@@ -16,6 +16,8 @@ Use `harness/helpers/resize_asset.py` for mechanical sprite resizing and read `h
 
 ## Sprite contract
 
+Deliver primary weapon sprites beside their C# consumers, e.g. `Content/Items/Weapons/ImperialSword.png` beside `ImperialSword.cs`, matching filename case exactly. Follow ExampleMod's default texture lookup. `assets/` holds only effects, music, sounds and shared textures; concepts and asset specs belong in `designs/`. A concept stored elsewhere does not satisfy the runtime texture requirement.
+
 Confirm filename/case/path; canvas and per-frame dimensions; frame order/timing; padding; origin/anchor; held/use direction; hitbox relationship; outlines; palette; transparency; glow/emissive layers; and required UI/world/projectile variants. Animation must read without jitter, volume changes, clipped effects, or inconsistent anchors.
 
 AI image generation may help explore shapes or mood only when permitted. Its output requires manual pixel cleanup/redrawing and the same technical review as any other source. Record source/provenance and redistribution rights; do not imitate a named living artist or reuse protected Terraria/mod assets.

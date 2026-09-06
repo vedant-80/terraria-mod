@@ -18,6 +18,8 @@ Generated imagery is a draft, not a shippable sprite by default. It must be redr
 
 ## Naming and sidecars
 
+Weapon layout follows ExampleMod: `Content/Items/Weapons/<Name>.cs` plus a case-exact sibling `<Name>.png`; class/namespace follow that directory. Keep primary sprites with content, with no `Texture` relocation override. Reserve `assets/` for effects, music, sounds and shared textures. Put concepts, provenance and specifications under `designs/`. Run `python3 harness/helpers/check_weapon_assets.py` before integration (also run by the build helper).
+
 Match the codebase’s established naming before adding a convention. Keep each source/export/license note discoverable. Until the repository defines an asset metadata format, store the approved spec in the task handoff and record provenance in `decisions.md` when it affects redistribution.
 
 ## Animation contract
