@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 
-def resize_asset(source, destination, reference, pixel_size=1):
+def resize_asset(source, destination, reference, pixel_size=1, alpha_cutoff=0):
     from PIL import Image
 
     source, destination, reference = map(Path, (source, destination, reference))
@@ -20,7 +20,10 @@ def resize_asset(source, destination, reference, pixel_size=1):
         if getattr(original, "n_frames", 1) != 1:
             raise ValueError("Animated inputs must be exported frame by frame")
         sprite = original.convert("RGBA")
-    bounds = sprite.getbbox()
+    if not 0 <= alpha_cutoff <= 254:
+        raise ValueError("Alpha cutoff must be between 0 and 254")
+    # Ignore near-invisible concept fringes when determining the crop only.
+    bounds = sprite.getchannel("A").point(lambda value: 255 if value > alpha_cutoff else 0).getbbox()
     if bounds is None:
         raise ValueError("Source is fully transparent")
     sprite = sprite.crop(bounds)
@@ -46,9 +49,11 @@ def main():
                         help="Comparable single-frame ExampleMod PNG (dimensions only)")
     parser.add_argument("--pixel-size", type=int, default=1,
                         help="Square exported pixels per logical pixel; default 1")
+    parser.add_argument("--alpha-cutoff", type=int, default=0,
+                        help="Ignore alpha at or below this value for cropping only (0-254)")
     args = parser.parse_args()
     try:
-        print(resize_asset(args.source, args.destination, args.reference, args.pixel_size))
+        print(resize_asset(args.source, args.destination, args.reference, args.pixel_size, args.alpha_cutoff))
     except (ValueError, OSError, ImportError) as error:
         parser.exit(1, f"Resize failed: {error}\nInstall Pillow using harness/helpers/requirements.txt if missing.\n")
 

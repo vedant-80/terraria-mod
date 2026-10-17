@@ -21,6 +21,8 @@ These instructions apply to every human or AI contributor in this repository. Re
 
 ## Terraria/tModLoader engineering
 
+- Iteration recipe policy: every craftable mod item must have exactly one recipe producing one item from exactly one Dirt Block, with no station or progression condition. Apply this to all future items until the creator explicitly ends the test policy. Do not alter vanilla/other-mod recipes. Projectiles are not craftable items.
+
 - Use .NET 8 for the mod, its projects, build instructions, and compatible tooling. Do not silently retarget to another .NET version.
 - For tModLoader C# API usage, inspect the local `~/tmod/ExampleMod/` source first. Prefer its demonstrated hooks, lifecycle patterns, content structure, and API usage over recalled examples or generic web results, while still confirming that the example applies to this mod's installed tModLoader version.
 - If ExampleMod does not answer the question, consult the [stable tModLoader API documentation](https://docs.tmodloader.net/docs/stable/). Prefer official tModLoader sources over third-party tutorials. Record any version-sensitive assumption in the task or handoff.
@@ -52,3 +54,20 @@ Before completion:
 6. Leave the working tree understandable: no unexplained artifacts, placeholders, or debug behavior.
 
 If required tooling, game access, credentials, or user decisions are unavailable, report the precise blocker and a reproducible next step. “Not run” and “blocked” are valid outcomes; they are not passes.
+
+## Agent skills
+
+### Issue tracker
+
+Track issues and specs in GitHub Issues for vedant-80/terraria-mod.
+Before reading or publishing tickets, read `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the five canonical triage labels.
+Before triaging issues, read `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repo.
+Before domain exploration or design, read `docs/agents/domain.md`.

@@ -6,11 +6,13 @@ import sys
 
 def check_weapon_assets(root):
     errors = []
-    for source in sorted((root / "Content/Items/Weapons").rglob("*.cs")):
+    sources = list((root / "Content/Items/Weapons").rglob("*.cs"))
+    sources.extend((root / "Content/Projectiles").rglob("*.cs"))
+    for source in sorted(sources):
         texture = source.with_suffix(".png")
         # Enumerating names also catches incorrect casing on case-insensitive systems.
         if texture.name not in {p.name for p in source.parent.iterdir()}:
-            errors.append(f"Missing weapon texture: {texture.relative_to(root)}")
+            errors.append(f"Missing content texture: {texture.relative_to(root)}")
             continue
         try:
             header = texture.read_bytes()[:24]
@@ -28,5 +30,5 @@ if __name__ == "__main__":
     for failure in failures:
         print(failure, file=sys.stderr)
     if not failures:
-        print("Weapon sprite paths and PNG headers: PASS")
+        print("Weapon/projectile sprite paths and PNG headers: PASS")
     sys.exit(bool(failures))

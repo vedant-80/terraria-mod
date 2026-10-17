@@ -1,41 +1,21 @@
 # NewMod Overview
 
-This document defines product canon. It is intentionally conservative until the creator supplies the mod’s identity. Agents may propose additions, but must not fill unknowns as fact.
-
 ## Product brief
 
-- Working title: NewMod
-- One-sentence pitch: TBD by the mod creator
-- Player fantasy: TBD
-- Design pillars: TBD
-- Intended audience and difficulty: TBD
-- Content scope: TBD
-- Multiplayer expectation: TBD
-- Runtime/toolchain: .NET 8 is required
-- Target tModLoader/Terraria version: verify from the project once initialized; use the stable API line unless the creator approves another target
-- Primary API reference: local `~/tmod/ExampleMod/` source, followed by the [stable tModLoader API documentation](https://docs.tmodloader.net/docs/stable/)
-- Distribution target: TBD
+NewMod adds open-ended conversations with Terraria townsfolk, whose distinct personalities and bounded memories make relationships feel persistent. The first iteration covers Guide, Merchant and Nurse in single-player, using a local Ollama model with no API key or cloud inference.
 
-## World and creative direction
+Design pillars: distinct in-world personalities, private local computation, bounded context and deterministic gameplay limits. Personality interpretations follow vanilla characterization; generated replies are not official lore and spoiler resistance is best-effort.
 
-- Themes/lore: TBD
-- Tone and writing voice: TBD
-- Visual identity, palette, and motifs: TBD
-- Audio identity: TBD
-- Vanilla compatibility philosophy: TBD
-- Other-mod compatibility philosophy: TBD
+## Player experience
 
-## Gameplay boundaries
+A separate Talk button preserves vanilla chat, Shop, Heal and happiness interactions. Choose four authored questions or enter up to 300 characters. Replies target 1–3 sentences. Memory and visible affinity belong to one character/world/NPC type and survive NPC replacement. Merchant buying prices can change by up to 10%; selling prices and Nurse fees remain vanilla.
 
-- Intended progression entry/exit points: TBD
-- Classes/playstyles supported: TBD
-- Power and grind targets: TBD
-- Features explicitly excluded: none recorded
+Players install Ollama and a model separately; qwen2.5:1.5b is the starter recommendation, not a guaranteed quality or performance minimum. Settings list installed local models and offer a readiness test. Windows hardware readings are advisory. See docs/LOCAL_SETUP.md.
 
-## Definition of a shippable feature
+## Boundaries and compatibility
 
-A feature is discoverable in the intended progression, mechanically complete, readable, localized, visually and aurally coherent, performant, multiplayer-safe where applicable, compatible with saves/configs as promised, and supported by recorded build plus in-game validation.
+.NET 8 remains required. Compilation passes against a workspace copy of the creator's installed tModLoader libraries (tModLoader stable 2026.08.3.0 / Terraria 1.4.4.9, confirmed from embedded assembly version). The Steam installation remains read only. Full packaging is blocked by sandbox socket restrictions during engine startup; gameplay remains unvalidated.
 
-## Proposal format
+Multiplayer conversation/pricing is disabled in v1. Future multiplayer will use server-owned state/inference, isolated per-player memory and bounded total storage, evicting old conversation text before separately capped relationship records. Stable identities and bounded storage seams are implemented now; networking and player authentication are deferred.
 
-When canon is missing, an ideator should provide two or three distinct options with player experience, progression placement, content cost, technical/art risks, and a recommendation. The creator or delegated decider accepts one through `harness/decisions.md`; only then does this overview change.
+Legacy Imperial weapon sources/assets are recoverably archived, excluded from compilation and packaging. Existing saved weapons become unloaded items until restored; no destructive world/item migration is performed. The one-Dirt-Block iteration recipe policy remains for any future craftable content.

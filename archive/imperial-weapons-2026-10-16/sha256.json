@@ -1,0 +1,13 @@
+{
+  "Content/Projectiles/ImperialShard.png": "7241843ca00a1e73d8b984d8bc99e1f15dadf478145af0a2532a96354887668e",
+  "Content/Projectiles/ImperialShard.cs": "7e628c1742c3ec1c10622e5d933dd31913936f6b241e04bbf2fb1c1831deb7ad",
+  "Content/Projectiles/ImperialSwordThrust.cs": "bbe9ca2b631f5d9f84e7c8601970a3f8104c03c872fcf719b458ffda030926e9",
+  "Content/Projectiles/ImperialSwordThrust.png": "80d5c2e67024f5cd8e6c6820156ea9eed82e1c8f3bb6c644e5be2478db1856b5",
+  "Content/Items/Weapons/ImperialSword.cs": "876b0ea1e8fce98d9b031c18de78ca4b893a7b3311e8ebbd4d7e2463a090025f",
+  "Content/Items/Weapons/ImperialSword.png": "80d5c2e67024f5cd8e6c6820156ea9eed82e1c8f3bb6c644e5be2478db1856b5",
+  "designs/concepts/imperial-shard-concept.png": "83c8dc561b44a06c6d2c93021e94687f9e26e09d3dea5c78503373c2ab9e6405",
+  "designs/concepts/imperial-sword-concept.png": "ba79542e8af823b6c25be683edceb41a03a42d1750168927459b122fcf76c500",
+  "designs/weapons/ImperialSword.md": "0d6875b646168037b39b30ea524c94e3e84f4d76146f250a5098157f60f8a44a",
+  "designs/weapons/ImperialShard.md": "33a07e0f190521687d2b0658c0e885f82e0e5e49a66272186487304ab4b26e0d",
+  "Localization/en-US.hjson": "191d7e86c271b24920a67a07fde63cd01573100486843f9b7fbbb16c550db5c7"
+}

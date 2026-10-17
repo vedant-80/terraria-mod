@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+using NewMod.Content.Projectiles;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -9,18 +9,21 @@ namespace NewMod.Content.Items.Weapons
 	{
 		private const int Damage = 50;
 		private const int UseTime = 20;
-		private const int OnFireDuration = 60;
 
 		public override void SetDefaults() {
 			Item.width = 40;
 			Item.height = 40;
 
-			Item.useStyle = ItemUseStyleID.Swing;
+			Item.useStyle = ItemUseStyleID.Rapier;
 			Item.useTime = UseTime;
 			Item.useAnimation = UseTime;
 			Item.autoReuse = true;
 
-			Item.DamageType = DamageClass.Melee;
+			Item.DamageType = DamageClass.MeleeNoSpeed;
+			Item.noMelee = true;
+			Item.noUseGraphic = true;
+			Item.shoot = ModContent.ProjectileType<ImperialSwordThrust>();
+			Item.shootSpeed = 2.1f;
 			Item.damage = Damage;
 			Item.knockBack = 6f;
 			Item.crit = 6;
@@ -30,20 +33,11 @@ namespace NewMod.Content.Items.Weapons
 			Item.UseSound = SoundID.Item1;
 		}
 
-		public override void MeleeEffects(Player player, Rectangle hitbox) {
-			if (Main.rand.NextBool(3)) {
-				Dust.NewDust(new Vector2(hitbox.X, hitbox.Y), hitbox.Width, hitbox.Height, DustID.GoldFlame);
-			}
-		}
-
-		public override void OnHitNPC(Player player, NPC target, NPC.HitInfo hit, int damageDone) {
-			target.AddBuff(BuffID.OnFire, OnFireDuration);
-		}
+		public override bool MeleePrefix() => true;
 
 		public override void AddRecipes() {
 			CreateRecipe()
-				.AddIngredient(ItemID.GoldBar, 10)
-				.AddTile(TileID.Anvils)
+				.AddIngredient(ItemID.DirtBlock, 1)
 				.Register();
 		}
 	}
