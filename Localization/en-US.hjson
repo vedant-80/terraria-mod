@@ -1,10 +1,76 @@
-Mods: {
-	NewMod: {
-		Items: {
-			ImperialSword: {
-				DisplayName: Imperial Sword
-				Tooltip: Strikes set enemies on fire
-			}
-		}
-	}
+{
+  "Mods": {
+    "NewMod": {
+      "Chat": {
+        "Talk": "Talk",
+        "Settings": "Conversation settings",
+        "Close": "Close",
+        "Unavailable": "Local conversations are unavailable.",
+        "SuggestedQuestions": "Suggested questions ▾",
+        "InputHint": "Choose a question or click below to type (300 characters maximum).",
+        "Send": "Send question",
+        "Cancel": "Cancel request",
+        "SetupInstructions": "Install Ollama from ollama.com. Set OLLAMA_NO_CLOUD=1 and restart Ollama. Run: ollama pull qwen2.5:1.5b. Refresh models, choose an installed model, and test readiness. See docs/LOCAL_SETUP.md in the source for full instructions. Chat runs locally without API keys. Replies may take up to 45 seconds.",
+        "SelectModel": "Choose installed model ▾",
+        "NoModels": "No installed local chat models found. Start Ollama and install a model, then refresh.",
+        "RefreshModels": "Refresh installed models / status",
+        "TestModel": "Test model readiness and latency",
+        "MemoryUnavailable": "Hardware memory estimate unavailable; test the model before chatting.",
+        "OpenPersonalities": "Open personality folder",
+        "OpenMemory": "Open memory folder",
+        "Reset": "Reset this NPC's memory and affinity",
+        "ConfirmReset": "Confirm reset of this NPC's memory and affinity",
+        "BackToTalk": "Back to conversation",
+        "Affinity": "Affinity: {0} / 100",
+        "CurrentModel": "Selected model: {0}",
+        "SetupNeeded": "Open conversation settings to check Ollama, choose a model and test readiness.",
+        "ReadyToTalk": "Ready to talk. Memories stay on this computer.",
+        "Cancelled": "Request cancelled.",
+        "TimedOut": "The request timed out. Try again or choose a smaller model.",
+        "Checking": "Checking the local Ollama runtime…",
+        "ModelsFound": "Local runtime reachable. Found {0} models; select one and test it.",
+        "ModelSelected": "Selected {0}. Test readiness before chatting.",
+        "Testing": "Testing local inference…",
+        "TestPassed": "Local inference succeeded in {0} seconds. Performance during gameplay may vary.",
+        "Thinking": "Thinking… You can cancel this request.",
+        "ResetDone": "Memory and affinity reset for this NPC, character and world.",
+        "FolderOpened": "Opened the local folder.",
+        "CommandDescription": "Open local NPC conversation settings.",
+        "SinglePlayerOnly": "NPC conversations currently support single-player only.",
+        "MemoryUnknown": "Hardware memory readings unavailable on this system. Use the readiness test.",
+        "MemoryReading": "Available RAM: {0} GiB / {1} GiB total.",
+        "MemoryLow": "Low available memory: close other apps or try a smaller model. This estimate does not block selection.",
+        "MemoryAdvisory": "Advisory only: model size, context and Terraria also consume memory. Test the selected model.",
+        "OperationFailed": "The operation could not finish. Check local setup and try again.",
+        "RuntimeUnavailable": "Ollama is unreachable or rejected the request. Start Ollama, refresh models and test readiness.",
+        "InvalidData": "Invalid model output or memory file. Try another reply/model; preserve malformed memory files before using Reset.",
+        "FileFailure": "Could not access local conversation files. Check folder permissions and available disk space.",
+        "ModelUnavailable": "The selected model is unavailable or unsupported. Refresh installed models and select a local chat model.",
+        "SaveFailed": "The conversation completed, but its memory could not be saved. Check folder permissions and disk space before continuing.",
+        "Questions": {
+          "Guide": {
+            "Q0": "What do you enjoy about helping people here?",
+            "Q1": "What makes a place feel like home to you?",
+            "Q2": "What should I focus on at this point in my adventure?",
+            "Q3": "How do you prepare for a dangerous night?",
+            "Q3Hardmode": "How are you coping with the changes in our world?"
+          },
+          "Merchant": {
+            "Q0": "How did you become interested in trading?",
+            "Q1": "What makes someone a trustworthy customer?",
+            "Q2": "How is business in our town?",
+            "Q3": "What do you value besides money?",
+            "Q3Hardmode": "Have the changes in the world affected your business?"
+          },
+          "Nurse": {
+            "Q0": "What is it like looking after this town?",
+            "Q1": "What makes a good day for you?",
+            "Q2": "How do you unwind after a difficult day?",
+            "Q3": "What do you wish adventurers understood?",
+            "Q3Hardmode": "Has looking after the town become harder lately?"
+          }
+        }
+      }
+    }
+  }
 }

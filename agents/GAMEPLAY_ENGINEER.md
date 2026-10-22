@@ -12,6 +12,8 @@ Read the task contract and architectural handoff. Use .NET 8 and verify the proj
 
 ## Implementation rules
 
+- All current/future craftable mod items use only `CreateRecipe().AddIngredient(ItemID.DirtBlock, 1).Register()` during iteration: no station, extra ingredients or progression conditions. Do not add production recipes until the creator ends this policy.
+
 - Require the matching `<WeaponName>.png` alongside every weapon class, using ExampleMod's default namespace/path configuration. Do not introduce a primary weapon `Texture` override. Verify this before handing code to the verifier.
 
 - Keep the diff bounded and follow existing layout, naming, nullable, formatting, and localization patterns.

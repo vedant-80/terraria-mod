@@ -1,33 +1,28 @@
 # Current Task
 
-- Date: 2026-09-06
-- State: review
-- Owner: orchestrator / implementer
-- Verifier: primary agent in a separate verification pass (no subagent tool available)
+- Date: 2026-10-16
+- State: compilation/core tests pass; packaging blocked by sandbox sockets, gameplay untested
+- Owner: orchestrator
+- Verifier: independent QA_VALIDATOR agent
 
-## Goal and player value
+## Approved contract
 
-Fix Imperial Sword's missing runtime texture and prevent recurrence with ExampleMod weapon layout rules and a build preflight.
+Implement local-only single-player NPC conversations (Guide, Merchant, Nurse) through Ollama. Starter model qwen2.5:1.5b; installed-model selector, Windows advisory memory and explicit readiness test. No cloud, credentials or automatic downloads. Preserve vanilla interactions through separate Talk UI. Four authored questions, custom input capped at 300 characters, brief replies, one cancellable request and 45-second timeout.
 
-## Scope
+Editable Markdown personalities; versioned bounded Markdown memories keyed by world/player/NPC type. Up to four recent exchanges, 1,200-character summary, fixed request budget. One structured response supplies dialogue, summary, bounded affinity suggestion. Affinity -100..100, max +/-2 per exchange, five cumulative movement/day, duplicate questions earn no further change that day. Merchant purchases only +/-10%, applied on shop opening. No tools or arbitrary model-directed filesystem access. Prompt injection resistance is best-effort; gameplay containment is enforced in code.
 
-Allowed: Content/Items/Weapons/ImperialSword.png, moving concept PNGs from assets/ to designs/, asset specifications, shared rules and affected role/pipeline/helper docs, build preflight and evidence.
-Protected: gameplay C#, localization, existing project/framework settings and unrelated user changes.
+Safely archive all previous weapon work including uncommitted content before retiring it. Do not change unrelated agent guidance or historical evidence. Existing weapons become unloaded saved items; retain exact sources/assets for recovery.
 
-## Acceptance and validation
+Future multiplayer: explicit identities and server-owned state/inference, isolated per-player context, per-record and aggregate budgets; evict inactive text before separately capped affinity. Networking is out of scope and new behavior must be disabled in multiplayer.
 
-- Exact sibling ImperialSword.cs / ImperialSword.png; namespace and class match default lookup.
-- 40×40 RGBA export based on local ExampleMod/Content/Items/Weapons/ExampleSword.png; preserve concept originals.
-- assets/ reserved for effects, music, sounds and shared textures; concepts under designs/.
-- Build helper checks weapon PNG existence/case/header before dotnet build.
-- Verify missing-file failure then repaired pass, inspect PNG, compare source hashes, run build helper and diff check.
-- Client reload, inventory/world/swing checks require game access; do not claim a runtime pass.
+## Validation
 
-## Decisions and handoff
+QA baseline and final: bash harness/helpers/build.sh. The installed Windows tModLoader is available read only at /mnt/c/Program Files (x86)/Steam/steamapps/common/tModLoader. Validation uses a copy at ../.local-tmodloader and a local ../tModLoader.targets wrapper. Full packaging cannot start the engine because the sandbox denies socket creation; BuildMod=false distinguishes compilation-only evidence. Meaningful standalone .NET 8 core tests for serialization/bounds, identity isolation, affinity and response validation; independent diff/lifecycle review. Manual gameplay/setup matrix remains not run absent game access. Record real evidence in harness/build_log.md.
 
-ADR-004 records the creator's requested layout. Baseline build helper returned MSB4019 for missing ../tModLoader.targets. Scoped asset repair proceeds despite this pre-existing blocker. No API, balance, network or save changes.
-Prior task evidence remains in harness/build_log.md.
+## Implementation handoff
 
-## Result
+Implementation and setup/validation docs are present. Archived exact weapon work with checksums, retained unrelated existing changes. Standalone core checks passed 34 assertions; integration static/localization/archive checks passed. Independent final QA evidence is recorded in build_log.md. Compilation-only mandatory helper (BuildMod=false) now passes with zero warnings/errors using copied installed libraries. Normal helper still fails at engine packaging startup due to SocketException(13); no packaging or gameplay pass is claimed. Run normal Build + Reload and docs/VALIDATION.md scenarios outside the restricted sandbox before release.
 
-Texture and documentation implemented. Preflight detected the original missing texture. Final checks recorded in build_log.md; client reload and final art approval remain unverified.
+## 2026-10-17 — Approved engineering-skill setup (complete)
+
+Creator approved GitHub Issues, default triage labels, and the displayed configuration draft. Scope: append the Agent skills block to AGENTS.md; create docs/agents/{issue-tracker,triage-labels,domain}.md and docs/adr/README.md; create only missing GitHub labels. Acceptance: all five canonical labels exist, pointers resolve, and harness/decisions.md remains canonical. Documentation checks and GitHub label readback passed; no runtime code changed. Existing mod validation limits above remain unchanged.

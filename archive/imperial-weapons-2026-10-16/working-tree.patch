@@ -1,0 +1,333 @@
+diff --git a/AGENTS.md b/AGENTS.md
+index 9a8d312..54b6950 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -21,6 +21,8 @@ These instructions apply to every human or AI contributor in this repository. Re
+ 
+ ## Terraria/tModLoader engineering
+ 
++- Iteration recipe policy: every craftable mod item must have exactly one recipe producing one item from exactly one Dirt Block, with no station or progression condition. Apply this to all future items until the creator explicitly ends the test policy. Do not alter vanilla/other-mod recipes. Projectiles are not craftable items.
++
+ - Use .NET 8 for the mod, its projects, build instructions, and compatible tooling. Do not silently retarget to another .NET version.
+ - For tModLoader C# API usage, inspect the local `~/tmod/ExampleMod/` source first. Prefer its demonstrated hooks, lifecycle patterns, content structure, and API usage over recalled examples or generic web results, while still confirming that the example applies to this mod's installed tModLoader version.
+ - If ExampleMod does not answer the question, consult the [stable tModLoader API documentation](https://docs.tmodloader.net/docs/stable/). Prefer official tModLoader sources over third-party tutorials. Record any version-sensitive assumption in the task or handoff.
+diff --git a/Content/Items/Weapons/ImperialSword.cs b/Content/Items/Weapons/ImperialSword.cs
+index 7c409e7..d5bda57 100644
+--- a/Content/Items/Weapons/ImperialSword.cs
++++ b/Content/Items/Weapons/ImperialSword.cs
+@@ -1,4 +1,4 @@
+-using Microsoft.Xna.Framework;
++using NewMod.Content.Projectiles;
+ using Terraria;
+ using Terraria.ID;
+ using Terraria.ModLoader;
+@@ -9,18 +9,21 @@ namespace NewMod.Content.Items.Weapons
+ 	{
+ 		private const int Damage = 50;
+ 		private const int UseTime = 20;
+-		private const int OnFireDuration = 60;
+ 
+ 		public override void SetDefaults() {
+ 			Item.width = 40;
+ 			Item.height = 40;
+ 
+-			Item.useStyle = ItemUseStyleID.Swing;
++			Item.useStyle = ItemUseStyleID.Rapier;
+ 			Item.useTime = UseTime;
+ 			Item.useAnimation = UseTime;
+ 			Item.autoReuse = true;
+ 
+-			Item.DamageType = DamageClass.Melee;
++			Item.DamageType = DamageClass.MeleeNoSpeed;
++			Item.noMelee = true;
++			Item.noUseGraphic = true;
++			Item.shoot = ModContent.ProjectileType<ImperialSwordThrust>();
++			Item.shootSpeed = 2.1f;
+ 			Item.damage = Damage;
+ 			Item.knockBack = 6f;
+ 			Item.crit = 6;
+@@ -30,20 +33,11 @@ namespace NewMod.Content.Items.Weapons
+ 			Item.UseSound = SoundID.Item1;
+ 		}
+ 
+-		public override void MeleeEffects(Player player, Rectangle hitbox) {
+-			if (Main.rand.NextBool(3)) {
+-				Dust.NewDust(new Vector2(hitbox.X, hitbox.Y), hitbox.Width, hitbox.Height, DustID.GoldFlame);
+-			}
+-		}
+-
+-		public override void OnHitNPC(Player player, NPC target, NPC.HitInfo hit, int damageDone) {
+-			target.AddBuff(BuffID.OnFire, OnFireDuration);
+-		}
++		public override bool MeleePrefix() => true;
+ 
+ 		public override void AddRecipes() {
+ 			CreateRecipe()
+-				.AddIngredient(ItemID.GoldBar, 10)
+-				.AddTile(TileID.Anvils)
++				.AddIngredient(ItemID.DirtBlock, 1)
+ 				.Register();
+ 		}
+ 	}
+diff --git a/Localization/en-US.hjson b/Localization/en-US.hjson
+index 1019644..7c67a59 100644
+--- a/Localization/en-US.hjson
++++ b/Localization/en-US.hjson
+@@ -1,9 +1,17 @@
+ Mods: {
+ 	NewMod: {
++		Projectiles: {
++			ImperialSwordThrust: {
++				DisplayName: Imperial Sword
++			}
++			ImperialShard: {
++				DisplayName: Imperial Shard
++			}
++		}
+ 		Items: {
+ 			ImperialSword: {
+ 				DisplayName: Imperial Sword
+-				Tooltip: Strikes set enemies on fire
++				Tooltip: Thrusts set enemies on fire and release a short-range, fading Imperial Shard
+ 			}
+ 		}
+ 	}
+diff --git a/MOD_OVERVIEW.md b/MOD_OVERVIEW.md
+index a717642..bc9b5dd 100644
+--- a/MOD_OVERVIEW.md
++++ b/MOD_OVERVIEW.md
+@@ -27,6 +27,8 @@ This document defines product canon. It is intentionally conservative until the
+ 
+ ## Gameplay boundaries
+ 
++- Active development rule: every craftable NewMod item costs one Dirt Block at no station until the creator ends iteration mode (ADR-005); this is not progression balance.
++
+ - Intended progression entry/exit points: TBD
+ - Classes/playstyles supported: TBD
+ - Power and grind targets: TBD
+diff --git a/agents/GAMEPLAY_ENGINEER.md b/agents/GAMEPLAY_ENGINEER.md
+index f1237bb..602d0e7 100644
+--- a/agents/GAMEPLAY_ENGINEER.md
++++ b/agents/GAMEPLAY_ENGINEER.md
+@@ -12,6 +12,8 @@ Read the task contract and architectural handoff. Use .NET 8 and verify the proj
+ 
+ ## Implementation rules
+ 
++- All current/future craftable mod items use only `CreateRecipe().AddIngredient(ItemID.DirtBlock, 1).Register()` during iteration: no station, extra ingredients or progression conditions. Do not add production recipes until the creator ends this policy.
++
+ - Require the matching `<WeaponName>.png` alongside every weapon class, using ExampleMod's default namespace/path configuration. Do not introduce a primary weapon `Texture` override. Verify this before handing code to the verifier.
+ 
+ - Keep the diff bounded and follow existing layout, naming, nullable, formatting, and localization patterns.
+diff --git a/agents/QA_VALIDATOR.md b/agents/QA_VALIDATOR.md
+index 625c1cb..1b9f4c0 100644
+--- a/agents/QA_VALIDATOR.md
++++ b/agents/QA_VALIDATOR.md
+@@ -17,6 +17,8 @@ This is the verifier role invoked by the orchestrator. Always use `bash harness/
+ 
+ ## Severity
+ 
++For iteration recipes, verify each craftable mod item consumes exactly one Dirt Block, outputs one item, and has no station, additional ingredient or progression condition. Reject new production recipes while the shared test policy is active.
++
+ For weapons, check every `Content/Items/Weapons/<Name>.cs` has a case-exact sibling `<Name>.png`, and that its class and namespace match the path. Missing runtime textures are blockers even when compilation succeeds. The build helper runs `harness/helpers/check_weapon_assets.py` before dotnet; retain client reload validation because this check is not a full tModLoader asset loader.
+ 
+ - Blocker: data loss, crash, security/licensing issue, cannot build/load, or acceptance-critical failure.
+diff --git a/harness/build_log.md b/harness/build_log.md
+index 126d556..16af57c 100644
+--- a/harness/build_log.md
++++ b/harness/build_log.md
+@@ -16,6 +16,17 @@ Append evidence for meaningful validation runs. Keep failures: they are useful d
+ 
+ ## Runs
+ 
++### 2026-09-06 — Imperial dagger thrust, shard and iteration recipe
++
++- Agent: primary gameplay implementer and separate verifier pass; independent specialist execution unavailable.
++- Baseline/final command: `bash harness/helpers/build.sh`. Weapon/projectile sprite preflight passes; dotnet build fails MSB4019 because /home/vdnt/tmod/tModLoader.targets is absent. Installed game version remains unavailable; no framework retarget performed.
++- API references: local ExampleShortsword.cs (Rapier, MeleeNoSpeed, noMelee/noUseGraphic, shoot and prefixes); ExampleShortswordProjectile.cs (heldProj, offsets, line collision); ExampleFlailProjectile.cs (child source/spawn); ExampleSwingingEnergySwordProjectile.cs (local immunity -1).
++- Implemented: 16-tick thrust with 30-pixel extension and 18-pixel blade collision, shard release at tick 8 on owner only. Shard speed 4 × lifetime 24 = at most 96 pixels; damage 40% inherited, nominal 20 before defense at base sword stats. Per-projectile local immunity prevents repeat NPC damage. Thrust retains 60-tick OnFire; item contact damage disabled. One Dirt Block recipe, no station.
++- Assets: default sibling 40×40 thrust and 32×32 shard PNGs verified by Pillow; shard visible crop 32×11 after alpha-cutoff 16; native image inspected. Existing sword image copied unchanged for thrust; original concepts preserved. Earlier faint draft moved recoverably to /tmp/newmod-imperial-shard-before-crop.png.
++- Checks: `git diff --check`; recipe scan found only CreateRecipe/AddIngredient(DirtBlock,1)/Register; PNG decoding and default-path review passed. Resize helper unittest discovery passed (1 test); no C# compile pass claimed.
++- Review: no graphics allocation, audio or input calls added in AI; owner-only child spawn and synced ai fields, bounded lifetime and no custom persistence. Default tile collision stops shard at walls; held projectile uses ownerHitCheck. Diff inspected against task. No balance, save or vanilla recipe expansion.
++- Not run: client load, directional thrust, damage/crit/reforge interactions, wall/point-blank hits, fade visibility, interruption/death, multiplayer duplicate checks, reconnect and dedicated-server load; 4×/bright-dark motion art review pending. Restore compatible installed tModLoader targets, run helper, then craft using one Dirt Block and exercise these scenarios. Current code is an uncompiled iteration candidate.
++
+ ### 2026-09-06 — Imperial Sword texture repair and default weapon layout
+ 
+ - Agent: primary implementer with separate verifier review pass; no independent subagent invoked.
+@@ -66,3 +77,12 @@ Append evidence for meaningful validation runs. Keep failures: they are useful d
+ - Result: `blocked`
+ - Evidence: build failed with `MSB4019`: `/home/vdnt/tmod/tModLoader.targets` was not found. Static scans found the item/localization references and both PNGs at `assets/concepts/`.
+ - Warnings/follow-up: install/configure tModLoader so `../tModLoader.targets` resolves, then rebuild and exercise obtaining, swinging, hitting, reforging, and multiplayer loading in-game. No final Terraria item sprite is included; the moved sword PNG remains concept art.
++
++### 2026-10-16 — NPC conversation rewrite baseline (independent QA)
++
++- Agent: QA_VALIDATOR; no implementation edits made before baseline.
++- Command: `bash harness/helpers/build.sh`; asset preflight PASS, command exit 1 because .NET first-run attempted a read-only `/home/vdnt/.dotnet/8.0.131.toolpath.sentinel`.
++- Retry: `DOTNET_CLI_HOME=/tmp/tmod-dotnet-home DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 bash harness/helpers/build.sh`; .NET SDK 8.0.131 selected, asset preflight PASS, command exit 1 at NuGet service-index access (network permission denied).
++- Diagnostic: `DOTNET_CLI_HOME=/tmp/tmod-dotnet-home DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1 dotnet build NewMod.csproj --nologo --no-restore`; exit 1, MSB4019 missing `/home/vdnt/tmod/tModLoader.targets`. This diagnostic does not replace mandatory helper.
++- Read-only dependency discovery: no tModLoader.targets, tModLoader.dll, or Terraria.dll found under /home/vdnt or /tmp; common Steam install directories absent. Exact installed tModLoader/Terraria versions unavailable. Local ExampleMod README warns its default source may target next release; build version 9999.0 is not an installed runtime version.
++- Verdict: baseline compile BLOCKED; no C# compilation pass or gameplay result claimed. Configure an actual compatible .NET 8 tModLoader installation at the imported targets path, ensure dependency restore works, then rerun the helper. Standalone .NET 8 core checks can run without proprietary game assemblies.
+diff --git a/harness/current_task.md b/harness/current_task.md
+index 519568b..86ea3be 100644
+--- a/harness/current_task.md
++++ b/harness/current_task.md
+@@ -1,33 +1,20 @@
+ # Current Task
+ 
+-- Date: 2026-09-06
+-- State: review
+-- Owner: orchestrator / implementer
+-- Verifier: primary agent in a separate verification pass (no subagent tool available)
++- Date: 2026-10-16
++- State: implementation
++- Owner: orchestrator
++- Verifier: independent QA_VALIDATOR agent
+ 
+-## Goal and player value
++## Approved contract
+ 
+-Fix Imperial Sword's missing runtime texture and prevent recurrence with ExampleMod weapon layout rules and a build preflight.
++Implement local-only single-player NPC conversations (Guide, Merchant, Nurse) through Ollama. Starter model qwen2.5:1.5b; installed-model selector, Windows advisory memory and explicit readiness test. No cloud, credentials or automatic downloads. Preserve vanilla interactions through separate Talk UI. Four authored questions, custom input capped at 300 characters, brief replies, one cancellable request and 45-second timeout.
+ 
+-## Scope
++Editable Markdown personalities; versioned bounded Markdown memories keyed by world/player/NPC type. Up to four recent exchanges, 1,200-character summary, fixed request budget. One structured response supplies dialogue, summary, bounded affinity suggestion. Affinity -100..100, max +/-2 per exchange, five cumulative movement/day, duplicate questions earn no further change that day. Merchant purchases only +/-10%, applied on shop opening. No tools or arbitrary model-directed filesystem access. Prompt injection resistance is best-effort; gameplay containment is enforced in code.
+ 
+-Allowed: Content/Items/Weapons/ImperialSword.png, moving concept PNGs from assets/ to designs/, asset specifications, shared rules and affected role/pipeline/helper docs, build preflight and evidence.
+-Protected: gameplay C#, localization, existing project/framework settings and unrelated user changes.
++Safely archive all previous weapon work including uncommitted content before retiring it. Do not change unrelated agent guidance or historical evidence. Existing weapons become unloaded saved items; retain exact sources/assets for recovery.
+ 
+-## Acceptance and validation
++Future multiplayer: explicit identities and server-owned state/inference, isolated per-player context, per-record and aggregate budgets; evict inactive text before separately capped affinity. Networking is out of scope and new behavior must be disabled in multiplayer.
+ 
+-- Exact sibling ImperialSword.cs / ImperialSword.png; namespace and class match default lookup.
+-- 40×40 RGBA export based on local ExampleMod/Content/Items/Weapons/ExampleSword.png; preserve concept originals.
+-- assets/ reserved for effects, music, sounds and shared textures; concepts under designs/.
+-- Build helper checks weapon PNG existence/case/header before dotnet build.
+-- Verify missing-file failure then repaired pass, inspect PNG, compare source hashes, run build helper and diff check.
+-- Client reload, inventory/world/swing checks require game access; do not claim a runtime pass.
++## Validation
+ 
+-## Decisions and handoff
+-
+-ADR-004 records the creator's requested layout. Baseline build helper returned MSB4019 for missing ../tModLoader.targets. Scoped asset repair proceeds despite this pre-existing blocker. No API, balance, network or save changes.
+-Prior task evidence remains in harness/build_log.md.
+-
+-## Result
+-
+-Texture and documentation implemented. Preflight detected the original missing texture. Final checks recorded in build_log.md; client reload and final art approval remain unverified.
++QA baseline and final: bash harness/helpers/build.sh. Missing ../tModLoader.targets is a known baseline blocker; investigate available installation before claiming compilation. Meaningful standalone .NET 8 core tests for serialization/bounds, identity isolation, affinity and response validation; independent diff/lifecycle review. Manual gameplay/setup matrix remains not run absent game access. Record real evidence in harness/build_log.md.
+diff --git a/harness/decisions.md b/harness/decisions.md
+index b469674..a8b182b 100644
+--- a/harness/decisions.md
++++ b/harness/decisions.md
+@@ -1,5 +1,16 @@
+ # Decision Log
+ 
++### ADR-005: Imperial thrust/shard iteration and Dirt Block recipes
++
++- Date: 2026-09-06
++- Status: accepted
++- Deciders: creator request; implementer selects reversible test values
++- Decision: ImperialSword uses a dagger-style projectile thrust with one delayed ImperialShard projectile. Shard is not an inventory item. All craftable NewMod items now and going forward use exactly one Dirt Block, no station or condition, yielding one item until creator ends test policy.
++- Implementation: retain 50 base damage and 20-tick cadence; thrust lasts 16 ticks, releases shard at tick 8. Shard gets 40% inherited damage, 4 pixels/tick, 24-tick lifetime (at most 96 pixels), continuous fade, tile collision, one hit per NPC. These values bound the requested short after-effect and are not approved progression balance.
++- Authority: default owner-spawned item projectile; only owning player spawns child, synced ai[1] emission flag. Normal projectile synchronization, no custom packets/saves. Transient projectiles expire; no reconnect persistence.
++- Compatibility: stable ImperialSword internal name, existing texture/default layout; add default sibling projectile textures. Thrust replaces item contact damage to avoid double hits. Fire debuff moves to thrust's OnHitNPC.
++- Validation: local ExampleShortsword/ExampleShortswordProjectile, ExampleFlailProjectile spawning and immunity patterns; baseline/final helper, asset checks and documented runtime matrix.
++
+ ### ADR-004: Default ExampleMod weapon resource layout
+ 
+ - Date: 2026-09-06
+@@ -65,3 +76,15 @@ The absence of another entry is not permission to invent project canon.
+ - Consequences: Failed builds remain failures; baseline blockers may permit documented scoped repairs/helper work. Agent instructions require the routing but are not an automated execution scheduler. Resizing requires Pillow and manual art review. No gameplay, save or network contracts change.
+ - Validation: actual build invocation and status; automated image geometry, grid and overwrite checks; agent instruction review.
+ - Supersedes / superseded by: none.
++
++### ADR-006: Local NPC conversations and bounded relationship ownership
++
++- Date: 2026-10-16
++- Status: accepted
++- Deciders: creator approved interview and implementation plan.
++- Context: Open-ended NPC conversation must avoid API charges/credentials, bound memory and gameplay effects, and leave a path to multiplayer.
++- Options: hosted free-tier proxy versus local inference; client-owned versus future server-owned relationships; unlimited history versus bounded summary and recent turns.
++- Decision: Local-only Ollama, editable personalities, bounded versioned Markdown memory addressed by world/player/NPC type. Separate UI, transport, persistence and relationship rules. Single-player first; explicitly disable conversation and pricing in multiplayer. Future host owns inference, memory and economy; total budgets evict old text before separately capped affinity records.
++- Consequences: Players install a runtime/model; hardware and roleplay quality vary. Models never execute tools or access secrets. Output is untrusted; deterministic limits contain affinity effects, without promising perfect injection immunity. Preserve and archive legacy weapons outside compilation/packaging; existing saved items become unloaded items. No networking or cloud service added.
++- Validation: baseline/final build helper, standalone core boundary/failure tests, independent review and documented manual gameplay checks.
++- Supersedes: ADR-005 weapon feature direction only; iteration recipe policy remains for any future craftable items.
+diff --git a/harness/helpers/README.md b/harness/helpers/README.md
+index c212977..730fc2e 100644
+--- a/harness/helpers/README.md
++++ b/harness/helpers/README.md
+@@ -1,5 +1,9 @@
+ # Shared helpers
+ 
++For concept images with near-invisible fringe pixels, use `--alpha-cutoff 16` to ignore alpha ≤16 when choosing crop bounds. Default is 0. This only changes crop bounds and does not change the retained pixels' alpha.
++
++The sprite preflight also checks all C# / PNG pairs under `Content/Projectiles/`, including ImperialSwordThrust and ImperialShard. Keep non-content helper classes outside these directories.
++
+ Build now requires Python 3 for `check_weapon_assets.py`, run before dotnet. Every C# file under `Content/Items/Weapons/` requires a case-exact sibling PNG with a nonzero PNG header. This is not full PNG decoding or C# parsing: review namespace/class alignment and client reload separately. Keep helper classes outside the weapon directory. Primary weapon sprites follow ExampleMod's sibling layout. Reserve `assets/` for effects, music, sounds and shared textures; concepts belong in `designs/`.
+ 
+ Run `bash harness/helpers/build.sh` before adding or editing code and after implementation. It selects SDK 8 through root `global.json`, calls `dotnet build` on NewMod.csproj, and propagates failure. Run from any directory using the script's absolute path. It does not install tModLoader: the project still requires `../tModLoader.targets` and its referenced assemblies. Save the command, exit status, and output in the verifier handoff/build log. A failed baseline permits scoped repairs or helper work recorded by the orchestrator, but never counts as a passing build.
+diff --git a/harness/helpers/check_weapon_assets.py b/harness/helpers/check_weapon_assets.py
+index c5a546c..c4e299f 100644
+--- a/harness/helpers/check_weapon_assets.py
++++ b/harness/helpers/check_weapon_assets.py
+@@ -6,11 +6,13 @@ import sys
+ 
+ def check_weapon_assets(root):
+     errors = []
+-    for source in sorted((root / "Content/Items/Weapons").rglob("*.cs")):
++    sources = list((root / "Content/Items/Weapons").rglob("*.cs"))
++    sources.extend((root / "Content/Projectiles").rglob("*.cs"))
++    for source in sorted(sources):
+         texture = source.with_suffix(".png")
+         # Enumerating names also catches incorrect casing on case-insensitive systems.
+         if texture.name not in {p.name for p in source.parent.iterdir()}:
+-            errors.append(f"Missing weapon texture: {texture.relative_to(root)}")
++            errors.append(f"Missing content texture: {texture.relative_to(root)}")
+             continue
+         try:
+             header = texture.read_bytes()[:24]
+@@ -28,5 +30,5 @@ if __name__ == "__main__":
+     for failure in failures:
+         print(failure, file=sys.stderr)
+     if not failures:
+-        print("Weapon sprite paths and PNG headers: PASS")
++        print("Weapon/projectile sprite paths and PNG headers: PASS")
+     sys.exit(bool(failures))
+diff --git a/harness/helpers/resize_asset.py b/harness/helpers/resize_asset.py
+index 7bc2b4c..dcd64c7 100644
+--- a/harness/helpers/resize_asset.py
++++ b/harness/helpers/resize_asset.py
+@@ -4,7 +4,7 @@ import argparse
+ from pathlib import Path
+ 
+ 
+-def resize_asset(source, destination, reference, pixel_size=1):
++def resize_asset(source, destination, reference, pixel_size=1, alpha_cutoff=0):
+     from PIL import Image
+ 
+     source, destination, reference = map(Path, (source, destination, reference))
+@@ -20,7 +20,10 @@ def resize_asset(source, destination, reference, pixel_size=1):
+         if getattr(original, "n_frames", 1) != 1:
+             raise ValueError("Animated inputs must be exported frame by frame")
+         sprite = original.convert("RGBA")
+-    bounds = sprite.getbbox()
++    if not 0 <= alpha_cutoff <= 254:
++        raise ValueError("Alpha cutoff must be between 0 and 254")
++    # Ignore near-invisible concept fringes when determining the crop only.
++    bounds = sprite.getchannel("A").point(lambda value: 255 if value > alpha_cutoff else 0).getbbox()
+     if bounds is None:
+         raise ValueError("Source is fully transparent")
+     sprite = sprite.crop(bounds)
+@@ -46,9 +49,11 @@ def main():
+                         help="Comparable single-frame ExampleMod PNG (dimensions only)")
+     parser.add_argument("--pixel-size", type=int, default=1,
+                         help="Square exported pixels per logical pixel; default 1")
++    parser.add_argument("--alpha-cutoff", type=int, default=0,
++                        help="Ignore alpha at or below this value for cropping only (0-254)")
+     args = parser.parse_args()
+     try:
+-        print(resize_asset(args.source, args.destination, args.reference, args.pixel_size))
++        print(resize_asset(args.source, args.destination, args.reference, args.pixel_size, args.alpha_cutoff))
+     except (ValueError, OSError, ImportError) as error:
+         parser.exit(1, f"Resize failed: {error}\nInstall Pillow using harness/helpers/requirements.txt if missing.\n")
+ 

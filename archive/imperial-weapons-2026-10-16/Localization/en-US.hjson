@@ -1,0 +1,18 @@
+Mods: {
+	NewMod: {
+		Projectiles: {
+			ImperialSwordThrust: {
+				DisplayName: Imperial Sword
+			}
+			ImperialShard: {
+				DisplayName: Imperial Shard
+			}
+		}
+		Items: {
+			ImperialSword: {
+				DisplayName: Imperial Sword
+				Tooltip: Thrusts set enemies on fire and release a short-range, fading Imperial Shard
+			}
+		}
+	}
+}

@@ -1,1 +1,1 @@
-NewMod content is currently in development.
+Talk freely with the Guide, Merchant and Nurse using a local Ollama model. Distinct editable personalities, bounded local memories and gradual relationships. Single-player preview; requires separate Ollama/model installation. No cloud inference or API key.

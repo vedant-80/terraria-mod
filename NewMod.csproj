@@ -4,5 +4,11 @@
     <AssemblyName>NewMod</AssemblyName>
     <LangVersion>latest</LangVersion>
     <TargetFramework>net8.0</TargetFramework>
+    <Nullable>annotations</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="archive/**/*.cs;tests/**/*.cs" />
+    <EmbeddedResource Remove="archive/**/*;tests/**/*" />
+    <None Remove="archive/**/*;tests/**/*" />
+  </ItemGroup>
 </Project>

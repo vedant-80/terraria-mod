@@ -1,5 +1,16 @@
 # Decision Log
 
+### ADR-005: Imperial thrust/shard iteration and Dirt Block recipes
+
+- Date: 2026-09-06
+- Status: accepted
+- Deciders: creator request; implementer selects reversible test values
+- Decision: ImperialSword uses a dagger-style projectile thrust with one delayed ImperialShard projectile. Shard is not an inventory item. All craftable NewMod items now and going forward use exactly one Dirt Block, no station or condition, yielding one item until creator ends test policy.
+- Implementation: retain 50 base damage and 20-tick cadence; thrust lasts 16 ticks, releases shard at tick 8. Shard gets 40% inherited damage, 4 pixels/tick, 24-tick lifetime (at most 96 pixels), continuous fade, tile collision, one hit per NPC. These values bound the requested short after-effect and are not approved progression balance.
+- Authority: default owner-spawned item projectile; only owning player spawns child, synced ai[1] emission flag. Normal projectile synchronization, no custom packets/saves. Transient projectiles expire; no reconnect persistence.
+- Compatibility: stable ImperialSword internal name, existing texture/default layout; add default sibling projectile textures. Thrust replaces item contact damage to avoid double hits. Fire debuff moves to thrust's OnHitNPC.
+- Validation: local ExampleShortsword/ExampleShortswordProjectile, ExampleFlailProjectile spawning and immunity patterns; baseline/final helper, asset checks and documented runtime matrix.
+
 ### ADR-004: Default ExampleMod weapon resource layout
 
 - Date: 2026-09-06
@@ -65,3 +76,15 @@ The absence of another entry is not permission to invent project canon.
 - Consequences: Failed builds remain failures; baseline blockers may permit documented scoped repairs/helper work. Agent instructions require the routing but are not an automated execution scheduler. Resizing requires Pillow and manual art review. No gameplay, save or network contracts change.
 - Validation: actual build invocation and status; automated image geometry, grid and overwrite checks; agent instruction review.
 - Supersedes / superseded by: none.
+
+### ADR-006: Local NPC conversations and bounded relationship ownership
+
+- Date: 2026-10-16
+- Status: accepted
+- Deciders: creator approved interview and implementation plan.
+- Context: Open-ended NPC conversation must avoid API charges/credentials, bound memory and gameplay effects, and leave a path to multiplayer.
+- Options: hosted free-tier proxy versus local inference; client-owned versus future server-owned relationships; unlimited history versus bounded summary and recent turns.
+- Decision: Local-only Ollama, editable personalities, bounded versioned Markdown memory addressed by world/player/NPC type. Separate UI, transport, persistence and relationship rules. Single-player first; explicitly disable conversation and pricing in multiplayer. Future host owns inference, memory and economy; total budgets evict old text before separately capped affinity records.
+- Consequences: Players install a runtime/model; hardware and roleplay quality vary. Models never execute tools or access secrets. Output is untrusted; deterministic limits contain affinity effects, without promising perfect injection immunity. Preserve and archive legacy weapons outside compilation/packaging; existing saved items become unloaded items. No networking or cloud service added.
+- Validation: baseline/final build helper, standalone core boundary/failure tests, independent review and documented manual gameplay checks.
+- Supersedes: ADR-005 weapon feature direction only; iteration recipe policy remains for any future craftable items.
