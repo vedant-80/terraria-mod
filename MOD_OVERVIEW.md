@@ -8,13 +8,13 @@ Design pillars: distinct in-world personalities, private local computation, boun
 
 ## Player experience
 
-A separate Talk button preserves vanilla chat, Shop, Heal and happiness interactions. Choose four authored questions or enter up to 300 characters. Replies target 1–3 sentences. Memory and visible affinity belong to one character/world/NPC type and survive NPC replacement. Merchant buying prices can change by up to 10%; selling prices and Nurse fees remain vanilla.
+A Talk action beside the native NPC dialogue buttons opens the conversation interface on demand, preserving vanilla chat, Shop, Heal and happiness interactions. Choose four authored questions or enter up to 300 characters. Replies target 1–3 sentences. Memory and visible affinity belong to one character/world/NPC type and survive NPC replacement. Merchant buying prices can change by up to 10%; selling prices and Nurse fees remain vanilla.
 
-Players install Ollama and a model separately; qwen2.5:1.5b is the starter recommendation, not a guaranteed quality or performance minimum. Settings list installed local models and offer a readiness test. Windows hardware readings are advisory. See docs/LOCAL_SETUP.md.
+Players install Ollama and a model separately; qwen2.5:1.5b is the starter recommendation, not a guaranteed quality or performance minimum. Settings distinguish the saved preferred model from verified Ollama availability, list installed local models and offer a readiness test. Sending and readiness tests require the preferred model to appear in the refreshed local catalog. Windows hardware readings are advisory. See docs/LOCAL_SETUP.md.
 
 ## Boundaries and compatibility
 
-.NET 8 remains required. Compilation passes against a workspace copy of the creator's installed tModLoader libraries (tModLoader stable 2026.08.3.0 / Terraria 1.4.4.9, confirmed from embedded assembly version). The Steam installation remains read only. Full packaging is blocked by sandbox socket restrictions during engine startup; gameplay remains unvalidated.
+.NET 8 remains required. Compilation passes against a workspace copy of the creator's installed tModLoader libraries (tModLoader stable 2026.08.3.0 / Terraria 1.4.4.9, confirmed from embedded assembly version). The Steam installation remains read only. Compilation and packaging pass using an isolated installed-version copy with the Linux native library search path and expanded execution permissions. Gameplay remains unvalidated.
 
 Multiplayer conversation/pricing is disabled in v1. Future multiplayer will use server-owned state/inference, isolated per-player memory and bounded total storage, evicting old conversation text before separately capped relationship records. Stable identities and bounded storage seams are implemented now; networking and player authentication are deferred.
 

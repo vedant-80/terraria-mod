@@ -1,18 +1,19 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
 using Terraria.Localization;
 using Terraria.UI;
+using NewMod.Conversations;
 
 namespace NewMod.Common.UI;
 
 internal sealed class ConversationUI : UIState
 {
     private UIPanel panel;
-    private UITextPanel<string> launcher;
     private UIList contents;
     private UIText status;
     private UIText reply;
@@ -30,6 +31,8 @@ internal sealed class ConversationUI : UIState
     private string lastStatus;
     private string lastReply;
     private string lastModel;
+    private RuntimeAvailability? lastAvailability;
+    private bool lastModelVerified;
     private int lastAffinity = int.MinValue;
     private float screenWidth;
     private float screenHeight;
@@ -38,17 +41,7 @@ internal sealed class ConversationUI : UIState
 
     internal static string Text(string key) => Language.GetTextValue("Mods.NewMod.Chat." + key);
 
-    public override void OnInitialize()
-    {
-        launcher = new UITextPanel<string>(Text("Talk"), 0.85f);
-        launcher.Width.Set(150, 0);
-        launcher.Height.Set(36, 0);
-        launcher.HAlign = 1;
-        launcher.Left.Set(-20, 0);
-        launcher.Top.Set(260, 0);
-        launcher.OnLeftClick += (_, _) => ShowConversation();
-        Append(launcher);
-    }
+    public bool Visible => visible;
 
     public void ShowSettings()
     {
@@ -60,7 +53,7 @@ internal sealed class ConversationUI : UIState
         ConversationRuntime.Current?.RefreshModels();
     }
 
-    private void ShowConversation()
+    public void ShowConversation()
     {
         if (ConversationRuntime.Current is not { NpcKey.Length: > 0 })
             return;
@@ -133,6 +126,7 @@ internal sealed class ConversationUI : UIState
         else
             BuildConversation();
         lastStatus = lastReply = lastModel = null;
+        lastAvailability = null;
         lastAffinity = int.MinValue;
         lastModels = ConversationRuntime.Current?.Models;
         lastModelCount = ConversationRuntime.Current?.Models.Count ?? 0;
@@ -229,10 +223,6 @@ internal sealed class ConversationUI : UIState
     {
         var runtime = ConversationRuntime.Current;
         bool supportedNpc = runtime is { NpcKey.Length: > 0 } && Main.LocalPlayer.talkNPC >= 0;
-        if (!visible && supportedNpc && launcher.Parent == null)
-            Append(launcher);
-        if ((visible || !supportedNpc) && launcher.Parent != null)
-            launcher.Remove();
         if (visible && (!settings && (!supportedNpc || conversationNpc != Main.LocalPlayer.talkNPC)))
             Close();
         if (visible && Main.keyState.IsKeyDown(Keys.Escape) && Main.oldKeyState.IsKeyUp(Keys.Escape))
@@ -254,7 +244,7 @@ internal sealed class ConversationUI : UIState
         if (visible && settings && modelsOpen && runtime != null &&
             (!ReferenceEquals(lastModels, runtime.Models) || lastModelCount != runtime.Models.Count))
             BuildPanel();
-        if ((visible && panel.IsMouseHovering) || (launcher.Parent != null && launcher.IsMouseHovering))
+        if (visible && panel.IsMouseHovering)
         {
             Main.LocalPlayer.mouseInterface = true;
             PlayerInput.LockVanillaMouseScroll("NewMod: NPC Conversations");
@@ -265,7 +255,18 @@ internal sealed class ConversationUI : UIState
             if (lastStatus != runtime.Status) { lastStatus = runtime.Status; status.SetText(lastStatus); changed = true; }
             if (reply != null && lastReply != runtime.Reply) { lastReply = runtime.Reply; reply.SetText(lastReply); changed = true; }
             if (affinity != null && lastAffinity != runtime.Affinity) { lastAffinity = runtime.Affinity; affinity.SetText(Language.GetTextValue("Mods.NewMod.Chat.Affinity", lastAffinity)); changed = true; }
-            if (model != null && lastModel != runtime.SelectedModel) { lastModel = runtime.SelectedModel; model.SetText(Language.GetTextValue("Mods.NewMod.Chat.CurrentModel", lastModel)); changed = true; }
+            bool verified = runtime.Availability.Contains(runtime.SelectedModel);
+            if (model != null && (lastModel != runtime.SelectedModel || lastAvailability != runtime.Availability.State || lastModelVerified != verified))
+            {
+                lastModel = runtime.SelectedModel;
+                lastAvailability = runtime.Availability.State;
+                lastModelVerified = verified;
+                string availability = Text("Runtime" + runtime.Availability.State);
+                string preference = Language.GetTextValue("Mods.NewMod.Chat.PreferredModel", lastModel,
+                    Text(verified ? "ModelInstalled" : "ModelUnverified"));
+                model.SetText(availability + "\n" + preference);
+                changed = true;
+            }
             if (changed) contents.Recalculate();
         }
         base.Update(gameTime);
@@ -331,12 +332,22 @@ internal sealed class ConversationInput : UIPanel
         if (focused)
         {
             Main.blockInput = true;
+        }
+        base.Update(gameTime);
+    }
+
+    protected override void DrawSelf(SpriteBatch spriteBatch)
+    {
+        // Match tModLoader UIInputTextField: consume queued text during drawing,
+        // after vanilla's update-time input handling has finished.
+        if (focused)
+        {
             PlayerInput.WritingText = true;
             Main.instance.HandleIME();
-            string next = Main.GetInputText(Value).Replace("\r", "").Replace("\n", " ");
+            string next = Main.GetInputText(Value, allowMultiLine: false).Replace("\r", "").Replace("\n", " ");
             if (next != Value)
                 SetValue(next);
         }
-        base.Update(gameTime);
+        base.DrawSelf(spriteBatch);
     }
 }

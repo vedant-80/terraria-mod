@@ -26,3 +26,15 @@ Implementation and setup/validation docs are present. Archived exact weapon work
 ## 2026-10-17 — Approved engineering-skill setup (complete)
 
 Creator approved GitHub Issues, default triage labels, and the displayed configuration draft. Scope: append the Agent skills block to AGENTS.md; create docs/agents/{issue-tracker,triage-labels,domain}.md and docs/adr/README.md; create only missing GitHub labels. Acceptance: all five canonical labels exist, pointers resolve, and harness/decisions.md remains canonical. Documentation checks and GitHub label readback passed; no runtime code changed. Existing mod validation limits above remain unchanged.
+
+## 2026-10-22 — NPC conversation UI fixes
+
+- State: implementation reviewed; branch `fix/npc-conversation-ui`; manual gameplay acceptance pending.
+- Creator confirmed: add Talk beside vanilla NPC dialogue actions; open conversation UI only after Talk is clicked. Preserve native Shop/Heal, Close and Happiness.
+- Fix keyboard text entry with focus/release handling and the existing 300-character limit.
+- Show saved model preference separately from verified Ollama/model availability. Block inference until the preferred model is verified installed; no automatic model installation or downloads.
+- Allowed paths: Common/UI/, Common/ConversationRuntime.cs, Conversations/ model availability state, tests/, Localization/en-US.hjson, docs/VALIDATION.md, MOD_OVERVIEW.md, harness task/decision/build evidence. No save formats, affinity, network protocol or balance changes.
+- Evidence required: verifier baseline/final helper; .NET 8 core regression tests; independent UI/runtime review; localization/diff checks; manual gameplay scenarios explicitly not run if game access unavailable. Submit branch/PR when GitHub authentication permits.
+- Baseline: helper initially failed exit 155 (pinned SDK absent). Recover pinned SDK under /tmp and local targets wrapper; preserve SDK/version constraints. No local ExampleMod checkout exists; use official stable/1.4.4 sources and installed 2026.08 assembly signatures.
+
+- Final evidence: independent normal helper compilation + packaging PASS (0 warnings/errors), compilation-only PASS, 41 core assertions PASS, localization/diff checks PASS. Review click-through finding resolved. Exact environment and failures are recorded in build_log.md. In-game typing/layout/native action isolation and live Ollama states remain unrun; see docs/VALIDATION.md.

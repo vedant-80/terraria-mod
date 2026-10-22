@@ -25,7 +25,8 @@ public sealed class ConversationRuntime : IDisposable
     public int Affinity => memory?.Affinity ?? 0;
     public int MerchantAffinity { get; private set; }
     public bool IsBusy => pending != null || saveTask is { IsCompleted: false };
-    public IReadOnlyList<string> Models { get; private set; } = Array.Empty<string>();
+    public ModelAvailability Availability { get; } = new();
+    public IReadOnlyList<string> Models => Availability.Models;
     public string SelectedModel { get; private set; } = "qwen2.5:1.5b";
     public string NpcKey { get; private set; } = "";
     private readonly MarkdownMemoryStore store;
@@ -97,14 +98,19 @@ public sealed class ConversationRuntime : IDisposable
             cancellation = null;
             try { completed.GetAwaiter().GetResult()?.Invoke(); }
             catch (OperationCanceledException) { Status = Text("TimedOut"); }
-            catch (System.Net.Http.HttpRequestException) { Status = Text("RuntimeUnavailable"); }
+            catch (System.Net.Http.HttpRequestException) { Availability.Invalidate(RuntimeAvailability.Unavailable); Status = Text("RuntimeUnavailable"); }
             catch (InvalidDataException) { Status = Text("InvalidData"); }
             catch (JsonException) { Status = Text("InvalidData"); }
             catch (IOException) { Status = Text("FileFailure"); }
             catch (UnauthorizedAccessException) { Status = Text("FileFailure"); }
-            catch (InvalidOperationException) { Status = Text("ModelUnavailable"); }
+            catch (InvalidOperationException) { Availability.Invalidate(); Status = Text("ModelUnavailable"); }
             catch (Exception ex) when (ex is ArgumentException or System.ComponentModel.Win32Exception)
             { Status = Text("OperationFailed"); }
+            finally
+            {
+                if (Availability.State == RuntimeAvailability.Checking)
+                    Availability.Invalidate();
+            }
         }
         if (index == npcIndex)
         {
@@ -184,6 +190,8 @@ public sealed class ConversationRuntime : IDisposable
 
     public void Cancel()
     {
+        if (Availability.State == RuntimeAvailability.Checking)
+            Availability.Invalidate();
         generation++;
         loadAttempted = false;
         cancellation?.Cancel();
@@ -201,12 +209,13 @@ public sealed class ConversationRuntime : IDisposable
     public void RefreshModels()
     {
         if (IsBusy) return;
+        Availability.Invalidate(RuntimeAvailability.Checking);
         Status = Text("Checking");
         Start(async token =>
         {
             var models = await client.ListModelsAsync(token);
             var names = models.Select(m => m.Name).ToArray();
-            return () => { Models = names; Status = Text(names.Length == 0 ? "NoModels" : "ModelsFound", names.Length); };
+            return () => { Availability.Complete(names); Status = Text(names.Length == 0 ? "NoModels" : "ModelsFound", names.Length); };
         });
     }
 
@@ -225,6 +234,7 @@ public sealed class ConversationRuntime : IDisposable
     public void TestModel()
     {
         if (IsBusy) return;
+        if (!Availability.Contains(SelectedModel)) { Status = Text("VerifyModelFirst"); return; }
         string model = SelectedModel;
         var id = new ConversationIdentity(Guid.NewGuid(), Guid.NewGuid(), "Guide");
         Status = Text("Testing");
@@ -239,6 +249,7 @@ public sealed class ConversationRuntime : IDisposable
     public void Send(string question)
     {
         if (IsBusy || memory == null || string.IsNullOrWhiteSpace(question) || question.Length > 300) return;
+        if (!Availability.Contains(SelectedModel)) { Status = Text("VerifyModelFirst"); return; }
         string key = NpcKey;
         var original = memory;
         string model = SelectedModel;
