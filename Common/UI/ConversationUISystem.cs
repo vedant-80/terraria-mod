@@ -15,6 +15,17 @@ public sealed class ConversationUISystem : ModSystem
     private ConversationUI state;
     private GameTime lastUpdate;
 
+    internal bool ConversationVisible => state?.Visible == true;
+
+    public void ShowConversation()
+    {
+        if (!Main.dedServ && !Main.gameMenu && Main.netMode == NetmodeID.SinglePlayer)
+        {
+            ConversationRuntime.Current?.Update();
+            state?.ShowConversation();
+        }
+    }
+
     public override void PostSetupContent()
     {
         interfaceLayer = new UserInterface();

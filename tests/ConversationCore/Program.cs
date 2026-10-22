@@ -9,6 +9,22 @@ var root = Path.Combine(Path.GetTempPath(), "newmod-core-" + Guid.NewGuid().ToSt
 Directory.CreateDirectory(root);
 try
 {
+    var catalog = new ModelAvailability();
+    const string preferred = "qwen2.5:1.5b";
+    Check(catalog.State == RuntimeAvailability.Unknown && !catalog.Contains(preferred), "saved preference does not prove installation");
+    catalog.Invalidate(RuntimeAvailability.Checking);
+    Check(!catalog.Contains(preferred), "inference blocked during discovery");
+    catalog.Complete(new[] { preferred });
+    Check(catalog.Contains(preferred), "discovered preference is verified");
+    catalog.Invalidate(RuntimeAvailability.Unavailable);
+    Check(catalog.Models.Count == 0 && !catalog.Contains(preferred), "runtime failure clears stale models");
+    catalog.Complete(Array.Empty<string>());
+    Check(catalog.State == RuntimeAvailability.Available && !catalog.Contains(preferred), "reachable runtime with no models");
+    catalog.Complete(new[] { "other:latest" });
+    Check(!catalog.Contains(preferred) && catalog.Contains("other:latest"), "removed preference cannot send; other installed model can");
+    catalog.Invalidate();
+    Check(catalog.State == RuntimeAvailability.Unknown && catalog.Models.Count == 0, "cancelled discovery returns to unknown");
+
     var id = new ConversationIdentity(Guid.NewGuid(), Guid.NewGuid(), "Guide");
     var store = new MarkdownMemoryStore(root, 1, 2);
     var memory = new MemoryRecord(id);
